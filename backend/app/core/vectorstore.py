@@ -3,11 +3,11 @@ from pathlib import Path
 import pickle
 import numpy as np
 import faiss
+from app.core.paths import VECTORSTORE_DIR
 
 # ---------------- CONFIG ----------------
-VECTOR_DB_DIR = Path("backend/data/vectorstore")
-INDEX_FILE = VECTOR_DB_DIR / "faiss.index"
-META_FILE = VECTOR_DB_DIR / "metadata.pkl"
+INDEX_FILE = VECTORSTORE_DIR / "faiss.index"
+META_FILE = VECTORSTORE_DIR / "metadata.pkl"
 # --------------------------------------
 
 class FAISSVectorStore:
@@ -17,7 +17,7 @@ class FAISSVectorStore:
         self.index = faiss.IndexFlatIP(embedding_dim)  # cosine similarity
         self.metadata: List[Dict] = []
 
-        VECTOR_DB_DIR.mkdir(parents=True, exist_ok=True)
+        VECTORSTORE_DIR.mkdir(parents=True, exist_ok=True)
 
     def add_documents(self, embedded_chunks: List[Dict]) -> None:
         # Add embedded chunks to FAISS index
@@ -39,7 +39,6 @@ class FAISSVectorStore:
 
         query_vector = query_vector.astype("float32").reshape(1, -1)
         scores, indices = self.index.search(query_vector, top_k)
-
         results: List[Dict] = []
         for idx in indices[0]:
             if idx == -1:
